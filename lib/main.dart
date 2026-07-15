@@ -11,26 +11,30 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Cargar variables de entorno
-  await dotenv.load(fileName: ".env");
-
-  if (!EnvConfig.isConfigured) {
-    throw Exception(
-      'Configuración incompleta: copiá .env.example a .env y completá SUPABASE_URL y SUPABASE_ANON_KEY.',
-    );
+  try {
+    await dotenv.load(fileName: '.env');
+  } catch (error) {
+    debugPrint('No se pudo cargar .env: $error');
   }
 
-  final configWarning = EnvConfig.configurationWarning;
-  if (configWarning != null) {
-    debugPrint('⚠️ Supabase: $configWarning');
+  if (EnvConfig.isConfigured) {
+    try {
+      await Supabase.initialize(
+        url: EnvConfig.supabaseUrl,
+        anonKey: EnvConfig.supabaseAnonKey,
+      );
+    } catch (error) {
+      debugPrint('No se pudo inicializar Supabase: $error');
+    }
+  } else {
+    debugPrint('Supabase no está configurado. La app iniciará sin conexión.');
   }
 
-  // Inicializar Supabase con las credenciales del .env
-  await Supabase.initialize(
-    url: EnvConfig.supabaseUrl,
-    anonKey: EnvConfig.supabaseAnonKey,
-  );
-
-  await PromoRepository().ensureInitialized();
+  try {
+    await PromoRepository().ensureInitialized();
+  } catch (error) {
+    debugPrint('No se pudieron inicializar promociones: $error');
+  }
 
   // Forzar orientación portrait
   await SystemChrome.setPreferredOrientations([
