@@ -230,8 +230,11 @@ class SupabaseService {
 
     // Fallback: promos guardadas como fila en `productos`.
     final dynamic idValue = int.tryParse(id) ?? id;
-    final row =
-        await client.from('productos').select().eq('id', idValue).single();
+    final row = await client
+        .from('productos')
+        .select()
+        .eq('id', idValue)
+        .single();
     final promo = Promo.fromProductoRow(row).copyWith(activa: false);
     await updatePromocion(promo);
   }
@@ -242,7 +245,7 @@ class SupabaseService {
     return client
         .from('pedidos')
         .stream(primaryKey: ['id'])
-        .order('created_at', ascending: false);
+        .order('fecha', ascending: false);
   }
 
   Future<void> createPedido({
@@ -259,6 +262,7 @@ class SupabaseService {
         'total': total,
         'items': items,
         'rango': rango,
+        'created_at': DateTime.now().toUtc().toIso8601String(),
       });
     } catch (e) {
       throw Exception('Error creando pedido: $e');

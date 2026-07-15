@@ -200,18 +200,20 @@ class _MainMenuEvoState extends State<MainMenuEvo>
         _actualizarFavorita();
       });
     } catch (e) {
+      debugPrint('Error cargando productos: $e');
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error cargando productos: $e'),
+        const SnackBar(
+          content: Text('No pudimos cargar el menu. Intenta nuevamente.'),
           backgroundColor: Colors.red,
-          duration: const Duration(seconds: 5),
+          duration: Duration(seconds: 5),
         ),
       );
       setState(() {
         misBurgers = [];
         cargandoProductos = false;
-        _errorProductos = e.toString();
+        _errorProductos =
+            'No pudimos cargar el menu. Revisa tu conexion e intenta nuevamente.';
       });
     }
   }
